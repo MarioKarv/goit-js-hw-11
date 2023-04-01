@@ -1,3 +1,6 @@
+import './sass/index.scss'
+import { lightbox } from './js/simplelightbox';
+import { Notify } from 'notiflix';
 import PicturesApiService from './js/apiservicepix';
 
 const searchForm = document.querySelector('.search-form');
@@ -12,9 +15,9 @@ searchForm.addEventListener('submit', onSearchForm);
 loadMoreButton.addEventListener('click', onLoadMore);
 
 const options = {
-  rootMargin: '100px',
+  rootMargin: '50px',
   root: null,
-  threshold: 0.8,
+  threshold: 1.0,
 };
 
 const observer = new IntersectionObserver(onLoadMore, options);
@@ -26,12 +29,12 @@ function onSearchForm(event) {
     picturesApiService.toTheStartNumber();
     
     if (picturesApiService.inputValue === '') {
-        return alert('Please, fill the field')
+        return Notify.warning('Please, fill the field');
     }
 
     shownPictures = 0;
     fetchGallery();
-    renderGallery(hits);
+    renderGallery();
 }
 
 
@@ -48,7 +51,7 @@ async function fetchGallery() {
     shownPictures += hits.length;
 
     if (!hits.length) {
-        alert(
+        Notify.failure(
           'Sorry, there are no images matching your search query. Please try again.'
         );
         loadMoreButton.classList.add('is-hidden');
@@ -59,12 +62,12 @@ async function fetchGallery() {
     shownPictures += hits.length;
 
     if (shownPictures < total) {
-        alert(`Hooray! We found ${total} images.`);
-        loadMoreButton.classList.add('is-hidden');
+        Notify.success(`Hooray! We found ${total} images.`);
+        loadMoreButton.classList.remove('is-hidden');
     }
 
     if (shownPictures >= total) {
-        alert("We're sorry, but you've reached the end of search results.")
+      Notify.info("We're sorry, but you've reached the end of search results.");
     }
 }
 
@@ -106,5 +109,6 @@ function renderGallery(elem) {
         }
       )
       .join('');
-    gallery.insertAdjacentHTML('beforeend', markup);
+  gallery.insertAdjacentHTML('beforeend', markup);
+  lightbox.refresh();
 }
